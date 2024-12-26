@@ -3,24 +3,31 @@ package com.crm.secure.securityConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+
+import com.crm.secure.filter.JwtFilter;
+import com.crm.secure.service.CustomUserDetailsService;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
-    // @Autowired
-    // private CustomUserDetailsService customUserDetailsService;
     @Autowired
-    private UserDetailsService userDetailsService;
+    private CustomUserDetailsService customUserDetailsService;
+
+    @Autowired
+    private JwtFilter jwtFilter;
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -37,8 +44,19 @@ public class SecurityConfig {
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider dbAuthProvider = new DaoAuthenticationProvider();
-        dbAuthProvider.setPasswordEncoder(NoOpPasswordEncoder.getInstance());
-        dbAuthProvider.setUserDetailsService(userDetailsService);
+        dbAuthProvider.setPasswordEncoder(new BCryptPasswordEncoder(12));
+        dbAuthProvider.setUserDetailsService(customUserDetailsService);
         return dbAuthProvider;
+    }
+
+    /* SINCE JWT WE NEED TO TALK WITH THE MANAGER OF AUTHENTICATION */
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig){
+        try {
+            return authConfig.getAuthenticationManager();
+        } catch (Exception e) {
+            
+        }
+        return null;
     }
 }

@@ -17,7 +17,7 @@ public class UserController {
 
     @Autowired
     private UserService userService;
-
+    
     @GetMapping("/users/all")
     public ResponseEntity<List<User>> getAllUsers() {
         List<User> users = userService.getAllUsers();
@@ -28,4 +28,14 @@ public class UserController {
         }
     }
 
+    @GetMapping("/test")
+    public ResponseEntity<String> getTest() {
+        List<User> users = userService.getAllUsers();
+        try {
+            return ResponseEntity.ok().body("fufk casdof");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("nothing");
+        }
+    }
+    
 }
