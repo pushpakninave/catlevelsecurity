@@ -1,20 +1,26 @@
 package com.crm.secure.securityConfig;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    // @Autowired
+    // private CustomUserDetailsService customUserDetailsService;
+    @Autowired
+    private UserDetailsService userDetailsService;
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -24,19 +30,15 @@ public class SecurityConfig {
                         .permitAll()
                         .anyRequest().authenticated())
                 .formLogin(Customizer.withDefaults())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .build();
     }
 
-    // testing using static data.
+    /* CUSTOM AUTH USING DATABASE */
     @Bean
-    public UserDetailsService UserDetailsService() {
-        UserDetails u1 = User.withDefaultPasswordEncoder()
-                .username("pushpak")
-                .password("123")
-                .roles("PLUMBER")
-                .build();
-        return new InMemoryUserDetailsManager(u1);
-
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider dbAuthProvider = new DaoAuthenticationProvider();
+        dbAuthProvider.setPasswordEncoder(NoOpPasswordEncoder.getInstance());
+        dbAuthProvider.setUserDetailsService(userDetailsService);
+        return dbAuthProvider;
     }
 }
