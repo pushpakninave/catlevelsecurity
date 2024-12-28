@@ -33,6 +33,7 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<String> loginUser(@RequestBody User userDetail) {
         try {
+            // This verify method is a custom method to authenticate user by verifying its creds with spring core authmanager.
             userService.verify(userDetail);
             return ResponseEntity.ok().body(userService.verify(userDetail));
         } catch (Exception e) {

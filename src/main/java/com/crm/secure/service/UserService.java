@@ -20,6 +20,9 @@ public class UserService {
     @Autowired
     AuthenticationManager authManager;
 
+    @Autowired
+    JwtService jwtService; 
+
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
 
     public User register(User user) {
@@ -31,11 +34,12 @@ public class UserService {
         return userRepository.findAll();
     }
 
+    /* This is custom auth manager. */
     public String verify(User userDetail) {
         Authentication authentication = authManager.authenticate(
                 new UsernamePasswordAuthenticationToken(userDetail.getUsername(), userDetail.getPassword()));
         if (authentication.isAuthenticated()) {
-            return "success";
+            return jwtService.generateToken(userDetail.getUsername());
         } else {
             return "fail";
         }
